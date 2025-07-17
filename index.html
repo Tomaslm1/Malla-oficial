@@ -64,6 +64,7 @@
 
   <script>
     const subjects = {
+      // (MISMA DEFINICIÓN DE SUBJECTS)...
       // S1
       CORE101: { name: "CORE: Civilización Contemporanea", semester: 1, prerequisites: [] },
       CORE103: { name: "CORE: Escritura Argumentativa", semester: 1, prerequisites: [] },
@@ -127,7 +128,11 @@
       TICS420: { name: "Programación Profesional", semester: 8, prerequisites: ["TICS200"] }
     };
 
-    const passed = new Set();
+    const passed = new Set(JSON.parse(localStorage.getItem("passedSubjects") || "[]"));
+
+    function saveProgress() {
+      localStorage.setItem("passedSubjects", JSON.stringify([...passed]));
+    }
 
     function renderMalla() {
       const container = document.getElementById("malla");
@@ -155,6 +160,7 @@
               btn.classList.add("unlocked");
               btn.addEventListener("click", () => {
                 passed.add(code);
+                saveProgress();
                 renderMalla();
               });
             } else {
