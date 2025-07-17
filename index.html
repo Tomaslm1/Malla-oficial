@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malla Interactiva - Ingeniería Civil Informática</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f3f4f6;
+    }
+    h1 {
+      text-align: center;
+    }
+    .malla-container {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .semestre {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 200px;
+    }
+    .semestre::before {
+      content: attr(data-semestre);
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .subject {
+      padding: 1rem;
+      background-color: #e5e7eb;
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .subject.locked {
+      background-color: #d1d5db;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+    .subject.unlocked {
+      background-color: #93c5fd;
+      color: #1e3a8a;
+    }
+    .subject.passed {
+      background-color: #86efac;
+      color: #065f46;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva - Ingeniería Civil Informática</h1>
+  <div id="malla" class="malla-container"></div>
+
+  <script>
+    const subjects = {
+      // S1
+      CORE101: { name: "CORE: Civilización", semester: 1, prerequisites: [] },
+      CORE103: { name: "CORE: Escritura", semester: 1, prerequisites: [] },
+      TICS100: { name: "Programación", semester: 1, prerequisites: [] },
+      MAT105: { name: "Cálculo Diferencial", semester: 1, prerequisites: [] },
+      MAT109: { name: "Álgebra", semester: 1, prerequisites: [] },
+      GYM101: { name: "Educación Física I", semester: 1, prerequisites: [] },
+
+      // S2
+      CORE102: { name: "CORE: Civilización II", semester: 2, prerequisites: ["CORE101"] },
+      MAT106: { name: "Cálculo Integral", semester: 2, prerequisites: ["MAT105"] },
+      FIS101: { name: "Física I", semester: 2, prerequisites: ["MAT105"] },
+      TEI101: { name: "Taller de Introducción", semester: 2, prerequisites: [] },
+      GYM102: { name: "Educación Física II", semester: 2, prerequisites: [] },
+
+      // S3
+      EST201: { name: "Probabilidades", semester: 3, prerequisites: ["MAT106"] },
+      FIS201: { name: "Física II", semester: 3, prerequisites: ["MAT106", "FIS101"] },
+      MAT203: { name: "Cálculo Multivariable", semester: 3, prerequisites: ["MAT106"] },
+      TICS101: { name: "Fundamentos de Computación", semester: 3, prerequisites: ["TICS100"] },
+      ING118: { name: "Fundamentos de Comunicación", semester: 3, prerequisites: [] },
+      LING111: { name: "Taller de Expresión", semester: 3, prerequisites: [] },
+      GYM103: { name: "Educación Física III", semester: 3, prerequisites: [] },
+
+      // S4
+      CORE201: { name: "CORE: Literatura", semester: 4, prerequisites: ["CORE102"] },
+      TICS314: { name: "Fundamentos de Computación II", semester: 4, prerequisites: ["TICS100"] },
+      FIS301: { name: "Física III", semester: 4, prerequisites: ["FIS201"] },
+      MAT208: { name: "Ecuaciones Diferenciales", semester: 4, prerequisites: ["MAT203"] },
+      TEI201: { name: "Taller de Diseño I", semester: 4, prerequisites: ["TEI101"] },
+      GYM104: { name: "Educación Física IV", semester: 4, prerequisites: [] },
+      PPO101: { name: "Práctica Profesional I", semester: 4, prerequisites: [] },
+
+      // S5
+      CORE302: { name: "CORE: Ciencias", semester: 5, prerequisites: ["CORE201"] },
+      TICS411: { name: "Estructura de Datos", semester: 5, prerequisites: ["TICS100"] },
+      TICS200: { name: "Lenguajes y Paradigmas", semester: 5, prerequisites: ["TICS100"] },
+      TICS230: { name: "Bases de Datos", semester: 5, prerequisites: ["TICS100"] },
+      ING200: { name: "Optimización", semester: 5, prerequisites: ["MAT203"] },
+      GYM105: { name: "Educación Física V", semester: 5, prerequisites: [] },
+
+      // S6
+      CORE401: { name: "CORE: Ética", semester: 6, prerequisites: [] },
+      TICS315: { name: "Inteligencia Artificial", semester: 6, prerequisites: ["TICS411"] },
+      TICS316: { name: "Diseño de Software", semester: 6, prerequisites: ["TICS200"] },
+      TICS311: { name: "Redes de Computadores", semester: 6, prerequisites: ["TICS411"] },
+      ECO110: { name: "Principios de Economía", semester: 6, prerequisites: ["ING200"] },
+      TEI301: { name: "Taller de Innovación", semester: 6, prerequisites: ["TEI201"] },
+
+      // S7
+      CORE504: { name: "CORE: Sociedad", semester: 7, prerequisites: ["CORE302"] },
+      TICS304: { name: "Sistemas de Información", semester: 7, prerequisites: ["TICS230"] },
+      TICS317: { name: "Arquitectura de Software", semester: 7, prerequisites: ["TICS316"] },
+      ECO216: { name: "Formulación y Evaluación de Proyectos", semester: 7, prerequisites: [] },
+      LING112: { name: "Taller de Expresión II", semester: 7, prerequisites: ["LING111"] },
+      TICS331: { name: "Ingeniería de Software", semester: 7, prerequisites: ["TICS200"] },
+
+      // S8
+      TICS314B: { name: "Sistemas Distribuidos", semester: 8, prerequisites: ["TICS311"] },
+      TICS400: { name: "Arquitectura de Computadores", semester: 8, prerequisites: ["TICS314"] },
+      TICS301: { name: "Sistemas Operativos", semester: 8, prerequisites: ["TICS311"] },
+      TEI401: { name: "Capstone Project", semester: 8, prerequisites: ["TEI301"] },
+      LID100: { name: "Liderazgo", semester: 8, prerequisites: [] },
+      TICS420: { name: "Programación Paralela", semester: 8, prerequisites: ["TICS200"] }
+    };
+
+    const passed = new Set();
+
+    function renderMalla() {
+      const container = document.getElementById("malla");
+      container.innerHTML = "";
+
+      const maxSemester = Math.max(...Object.values(subjects).map(s => s.semester));
+
+      for (let s = 1; s <= maxSemester; s++) {
+        const semCol = document.createElement("div");
+        semCol.className = "semestre";
+        semCol.dataset.semestre = `Semestre ${s}`;
+
+        Object.entries(subjects).forEach(([code, subject]) => {
+          if (subject.semester === s) {
+            const btn = document.createElement("div");
+            btn.className = "subject";
+            btn.id = code;
+            btn.innerHTML = `<strong>${code}</strong><br>${subject.name}`;
+
+            const unlocked = subject.prerequisites.every(p => passed.has(p));
+
+            if (passed.has(code)) {
+              btn.classList.add("passed");
+            } else if (unlocked) {
+              btn.classList.add("unlocked");
+              btn.addEventListener("click", () => {
+                passed.add(code);
+                renderMalla();
+              });
+            } else {
+              btn.classList.add("locked");
+            }
+
+            semCol.appendChild(btn);
+          }
+        });
+
+        container.appendChild(semCol);
+      }
+    }
+
+    renderMalla();
+  </script>
+</body>
+</html>
