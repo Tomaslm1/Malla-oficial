@@ -128,54 +128,55 @@
       TICS420: { name: "Programación Profesional", semester: 8, prerequisites: ["TICS200"] }
     };
 
-    const passed = new Set(JSON.parse(localStorage.getItem("passedSubjects") || "[]"));
+    <script>
+  const subjects = {
+    // (MISMA DEFINICIÓN DE SUBJECTS)
+    // [... ya definido arriba, lo dejas igual ...]
+  };
 
-    function saveProgress() {
-      localStorage.setItem("passedSubjects", JSON.stringify([...passed]));
-    }
+  const passed = new Set(); // ← Ya no usamos localStorage
 
-    function renderMalla() {
-      const container = document.getElementById("malla");
-      container.innerHTML = "";
+  function renderMalla() {
+    const container = document.getElementById("malla");
+    container.innerHTML = "";
 
-      const maxSemester = Math.max(...Object.values(subjects).map(s => s.semester));
+    const maxSemester = Math.max(...Object.values(subjects).map(s => s.semester));
 
-      for (let s = 1; s <= maxSemester; s++) {
-        const semCol = document.createElement("div");
-        semCol.className = "semestre";
-        semCol.dataset.semestre = `Semestre ${s}`;
+    for (let s = 1; s <= maxSemester; s++) {
+      const semCol = document.createElement("div");
+      semCol.className = "semestre";
+      semCol.dataset.semestre = `Semestre ${s}`;
 
-        Object.entries(subjects).forEach(([code, subject]) => {
-          if (subject.semester === s) {
-            const btn = document.createElement("div");
-            btn.className = "subject";
-            btn.id = code;
-            btn.innerHTML = `<strong>${code}</strong><br>${subject.name}`;
+      Object.entries(subjects).forEach(([code, subject]) => {
+        if (subject.semester === s) {
+          const btn = document.createElement("div");
+          btn.className = "subject";
+          btn.id = code;
+          btn.innerHTML = `<strong>${code}</strong><br>${subject.name}`;
 
-            const unlocked = subject.prerequisites.every(p => passed.has(p));
+          const unlocked = subject.prerequisites.every(p => passed.has(p));
 
-            if (passed.has(code)) {
-              btn.classList.add("passed");
-            } else if (unlocked) {
-              btn.classList.add("unlocked");
-              btn.addEventListener("click", () => {
-                passed.add(code);
-                saveProgress();
-                renderMalla();
-              });
-            } else {
-              btn.classList.add("locked");
-            }
-
-            semCol.appendChild(btn);
+          if (passed.has(code)) {
+            btn.classList.add("passed");
+          } else if (unlocked) {
+            btn.classList.add("unlocked");
+            btn.addEventListener("click", () => {
+              passed.add(code);
+              renderMalla();
+            });
+          } else {
+            btn.classList.add("locked");
           }
-        });
 
-        container.appendChild(semCol);
-      }
+          semCol.appendChild(btn);
+        }
+      });
+
+      container.appendChild(semCol);
     }
+  }
 
-    renderMalla();
-  </script>
+  renderMalla();
+</script>
 </body>
 </html>
